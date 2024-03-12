@@ -1,6 +1,5 @@
 # Hangman Game
-My first personal project - Creating an executable Hangman game using python and tk interface
-.exe file created with PyInstaller
+My first personal project - Creating an executable Hangman game using python and tk interface. Bundling with PyInstaller.
 
 ## Challenges
 - Issue with file pathing after PyInstaller bundling
