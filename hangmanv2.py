@@ -1,10 +1,19 @@
 import tkinter as tk
 from tkinter import messagebox
 import random
-import os
+import os, sys
+
+def resource_path(relative_path):
+    """get absolute path to resource"""
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+            base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 
 def choose_word():
-    with open("HangmanList.txt", "r") as HangmanList:
+    with open(resource_path("HangmanList.txt"), "r") as HangmanList:
         wordsAll = HangmanList.readlines()
         return random.choice(wordsAll).strip()
     
@@ -12,7 +21,7 @@ def updateHangman():
     global numStrikes
     global hangman_lbl
     global hangman_imgs_list
-    img = tk.PhotoImage(file=f"assets\strike{numStrikes}.png")
+    img = tk.PhotoImage(file=resource_path(f"assets\strike{numStrikes}.png"))
     hangman_lbl.configure(image=img) 
     hangman_imgs_list.append(img)
     return
@@ -37,14 +46,15 @@ def alphabetPressed(tkRoot, al, answerVar):
         if guessed_answer == list(answerVar):
             messagebox.showinfo("Congrats!", "You Win!!")
             tkRoot.destroy()
-            return 
     else:
         numStrikes += 1
         updateHangman()
         if numStrikes>=6:
             messagebox.showerror("Sorry...", f"You lose. The word is {answerVar}")
             tkRoot.destroy()
-            return
+    
+    return
+            
         
     
 
@@ -75,7 +85,6 @@ numStrikes = 0 #var updated after every guess
 hangman_imgs_list = [] #used to keep reference to the images
 
 
-
 ##create tk interface
 root = tk.Tk()
 root.title("HANGMAN!")
@@ -89,7 +98,7 @@ frm_buttons_bot = tk.Frame(master=root)
 frm_final_guess = tk.Frame(master=root)
 
 ##create hangman image and user's guess. NOT packing yet.
-hangman_img = tk.PhotoImage(file="assets\strike0.png")
+hangman_img = tk.PhotoImage(file=resource_path("assets\strike0.png"))
 hangman_lbl = tk.Label(master=frm_hangman_img, image=hangman_img)
 hangman_lbl.pack()
 guess_lbl = tk.Label(master=frm_guess, text=''.join(guessed_answer), font=("Arial", 90))
@@ -108,7 +117,7 @@ file_paths_btn = [
 
 for item in file_paths_btn:
     key = os.path.basename(item).split(".")[0]
-    button_imgs[key] = tk.PhotoImage(file=item)
+    button_imgs[key] = tk.PhotoImage(file=resource_path(item))
 
 # Create the buttons
 alphabets = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P",
@@ -129,7 +138,7 @@ explanation_text_lbl = tk.Label(master=frm_final_guess, text="Guess the word:", 
 explanation_text_lbl.pack(side=tk.LEFT)
 user_entry = tk.Entry(master=frm_final_guess, width=50, font=("Arial",15))
 user_entry.pack(side=tk.LEFT)
-submit_img = tk.PhotoImage(file="assets\submit_button.png")
+submit_img = tk.PhotoImage(file=resource_path("assets\submit_button.png"))
 submit_btn = tk.Button(master=frm_final_guess, image=submit_img, command=lambda: checkFinal(root, user_entry.get(), answer))
 submit_btn.pack(side=tk.LEFT)
 
