@@ -4,15 +4,49 @@ import random
 import os
 
 def choose_word():
-    with open("assets\HangmanList.txt", "r") as HangmanList:
+    with open("HangmanList.txt", "r") as HangmanList:
         wordsAll = HangmanList.readlines()
         return random.choice(wordsAll).strip()
     
-def updateHangman(): 
+def updateHangman():
+    global numStrikes
+    global hangman_lbl
+    global hangman_imgs_list
+    img = tk.PhotoImage(file=f"assets\strike{numStrikes}.png")
+    hangman_lbl.configure(image=img) 
+    hangman_imgs_list.append(img)
     return
 
-def alphabetPressed(): ##if alphabet button pressed
-    return
+def alphabetPressed(tkRoot, al, answerVar):
+    global guess_lbl
+    global guessed_answer
+    global numStrikes
+    
+    # Convert the guessed letter and the answer to uppercase
+    al = al.upper()
+    answerVar = answerVar.upper()
+
+    if al in answerVar:
+        # Update guessed_answer with the guessed letter
+        for i in range(len(answerVar)):
+            if answerVar[i] == al:
+                guessed_answer[i] = al
+
+        # Update guess_lbl with the modified guessed_answer
+        guess_lbl.config(text=''.join(guessed_answer))
+        if guessed_answer == list(answerVar):
+            messagebox.showinfo("Congrats!", "You Win!!")
+            tkRoot.destroy()
+            return 
+    else:
+        numStrikes += 1
+        updateHangman()
+        if numStrikes>=6:
+            messagebox.showerror("Sorry...", f"You lose. The word is {answerVar}")
+            tkRoot.destroy()
+            return
+        
+    
 
 def checkFinal(tkRoot, guessVar, answerVar):
     global numStrikes
@@ -21,8 +55,8 @@ def checkFinal(tkRoot, guessVar, answerVar):
         tkRoot.destroy()
         return 
     else:
-        updateHangman()
         numStrikes += 1
+        updateHangman()
         if numStrikes>=6:
             messagebox.showerror("Sorry...", f"You lose. The word is {answerVar}")
             tkRoot.destroy()
@@ -33,9 +67,14 @@ def checkFinal(tkRoot, guessVar, answerVar):
 #--------------------------------------------- MAIN FUNCTION -----------------------------------------------#
 
 ##variables required in game
-answer = "abc"
-guessed_answer = len(answer) * " _ " #var updated after every alpha guess
+answer = choose_word()
+guessed_answer = [] #var updated after every alpha guess
+for i in range(len(answer)):
+    guessed_answer.append(' _ ')
 numStrikes = 0 #var updated after every guess
+hangman_imgs_list = [] #used to keep reference to the images
+
+
 
 ##create tk interface
 root = tk.Tk()
@@ -53,7 +92,7 @@ frm_final_guess = tk.Frame(master=root)
 hangman_img = tk.PhotoImage(file="assets\strike0.png")
 hangman_lbl = tk.Label(master=frm_hangman_img, image=hangman_img)
 hangman_lbl.pack()
-guess_lbl = tk.Label(master=frm_guess, text=guessed_answer, font=("Arial", 90))
+guess_lbl = tk.Label(master=frm_guess, text=''.join(guessed_answer), font=("Arial", 90))
 guess_lbl.pack()
 
 # Create dictionary to store button PhotoImages
@@ -78,10 +117,10 @@ alphabets = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P",
 
 for alphabet in alphabets:
     if (alphabet<="M"):
-        button = tk.Button(frm_buttons_top, image=button_imgs[alphabet], command=lambda: alphabetPressed())
+        button = tk.Button(frm_buttons_top, image=button_imgs[alphabet], command=lambda al=alphabet: alphabetPressed(root, al, answer))
         button.pack(side=tk.LEFT)
     else:
-        button = tk.Button(frm_buttons_bot, image=button_imgs[alphabet], command=lambda: alphabetPressed())
+        button = tk.Button(frm_buttons_bot, image=button_imgs[alphabet], command=lambda al=alphabet: alphabetPressed(root, al, answer))
         button.pack(side=tk.LEFT)
 
 
